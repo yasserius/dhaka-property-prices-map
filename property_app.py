@@ -1,7 +1,6 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-import dash_table as dt
 
 import pandas as pd
 
@@ -25,29 +24,6 @@ server = app.server
 app.title = 'Property Prices in Dhaka'
 
 # ------------------------------------------------------------------------------
-
-# regions = list(df['Region'].unique())
-#
-# regions_dropdown = html.Div(
-#     [
-#             dcc.Checklist(
-#                 id = 'regions',
-#                 options=[
-#                     {'label': region, 'value': region}
-#                     for region in regions
-#                 ],
-#                 value=regions,
-#                 labelStyle={
-#                     'display': 'ock',
-#                     # 'margin': '10px',
-#                     'padding': '5px',
-#                     'left': '50px'},
-#                 inputStyle={
-#                     'margin': '5px'},
-#             )
-#     ],
-#     # className='col-md-6',
-# )
 
 property_types = list(df['Type'].unique())
 
@@ -105,22 +81,22 @@ checklist_section = html.Div([
 
 # ------------------------------------------------------------------------------
 
-prices = df['Price']
-
-max_price = prices.max()
-min_price = prices.min()
-
-range = max_price - min_price
-
-def get_lakhs_crores(money):
-    if money < 1e7:
-        output = int(money/1e5)
-        output = "{} lakh".format(output)
-    else:
-        output = int(money/1e7)
-        output = "{} crore".format(output)
-
-    return output
+# prices = df['Price']
+#
+# max_price = prices.max()
+# min_price = prices.min()
+#
+# range = max_price - min_price
+#
+# def get_lakhs_crores(money):
+#     if money < 1e7:
+#         output = int(money/1e5)
+#         output = "{} lakh".format(output)
+#     else:
+#         output = int(money/1e7)
+#         output = "{} crore".format(output)
+#
+#     return output
 
 price_slider = html.Div([
     html.Div([
@@ -136,16 +112,23 @@ price_slider = html.Div([
     html.Div([
             dcc.RangeSlider(
                 id='price-slider',
-                min=min_price,
-                max=max_price,
-                step=range/1000,
-                value=[min_price, max_price],
+                min=500000,
+                max=80000000,
+                step=10000,
+                # min=min_price,
+                # max=max_price,
+                # step=range/1000,
+                value=[500000, 80000000],
+                # value=[min_price, max_price],
                 marks={
                 # https://community.plotly.com/t/range-slider-labels-not-showing/6605/2
                 # key must be int
-                    min_price: get_lakhs_crores(min_price),
-                    10000000: get_lakhs_crores(10000000),
-                    max_price: get_lakhs_crores(max_price),
+                    500000: '5 Lakh',
+                    10000000: '1 crore',
+                    80000000: '8 crore',
+                    # min_price: get_lakhs_crores(min_price),
+                    # 10000000: get_lakhs_crores(10000000),
+                    # max_price: get_lakhs_crores(max_price),
                 },
             ),
 
@@ -252,7 +235,7 @@ header = html.Div(
             [
                 html.H1("Property Prices in Dhaka", style={'color': '#245ead'}),
                 html.P("Interactive Map of some property listings from BProperty"),
-                html.A("View Code", href="#"),
+                html.A("View Code", href="https://github.com/yasserius/dhaka-property-prices-map"),
 
 
             ]
@@ -478,9 +461,6 @@ def process_bedrooms(input):
 
     return output
 
-# @app.callback(
-#     Output('scattermap', 'figure'),
-#     Input('price-slider', 'value'))
 @app.callback(
     [Output(component_id='scattermap', component_property='figure'),
     Output(component_id='count_and_price', component_property='children'),],
@@ -504,6 +484,7 @@ def update_selected_row_indices(price_range, types, bedrooms):
 
     no_houses = df_inner.shape[0]
 
+    # display_text = f"Displaying {no_houses} properties/apartments."
     display_text = f"Displaying {no_houses} properties/apartments within the price range of {lower_price:,} and {upper_price:,} taka."
     # .format(no_houses, lower_price, upper_price)
     # https://queirozf.com/entries/python-number-formatting-examples
